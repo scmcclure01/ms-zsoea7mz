@@ -247,12 +247,24 @@
 
   <!-- Always-visible dock -->
   <div class="dock" id="dock">
-    <div class="dock-info">
-      <div class="dock-name" id="dock-name">Ready</div>
-      <div class="dock-sub" id="dock-sub">Pick something to play</div>
+    <div class="dock-progress"><div id="dock-bar"></div></div>
+    <div class="dock-extra" id="dock-extra" hidden>
+      <div class="mini-rail" title="Current position"><div id="mini-knob"></div></div>
+      <div class="stepper">
+        <button class="btn ghost sm" id="dock-slower" aria-label="Slower">−</button>
+        <span id="dock-rate">100%</span>
+        <button class="btn ghost sm" id="dock-faster" aria-label="Faster">+</button>
+      </div>
+      <button class="btn ghost sm" id="dock-view">Full view</button>
     </div>
-    <button id="too-close" class="btn warn" disabled>Too close</button>
-    <button id="stop" class="btn stop">STOP</button>
+    <div class="dock-main">
+      <div class="dock-info">
+        <div class="dock-name" id="dock-name">Ready</div>
+        <div class="dock-sub" id="dock-sub">Pick something to play</div>
+      </div>
+      <button id="too-close" class="btn warn" disabled>Too close</button>
+      <button id="stop" class="btn stop">STOP</button>
+    </div>
   </div>
 
   <dialog id="modal">

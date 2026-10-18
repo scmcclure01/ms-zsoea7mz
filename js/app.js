@@ -49,6 +49,7 @@ function showTab(name) {
   try { localStorage.setItem('handyctl.tab', name); } catch {}
   if (name === 'create') requestAnimationFrame(() => { updateCreatePreview(); tlEditor.draw(); });
   if (name === 'play') renderLibrary();
+  updateNow();
   window.scrollTo({ top: 0 });
 }
 $('#tabs').addEventListener('click', (e) => {
@@ -109,6 +110,11 @@ function updateNow() {
   $('#too-close').disabled = !(st === 'playing' || st === 'manual' || st === 'cooldown');
   $('#too-close').textContent = st === 'cooldown' ? '+ More time' : 'Too close';
   $('#dock').classList.toggle('cooldown', st === 'cooldown');
+  const active = st !== 'idle';
+  $('#dock-extra').hidden = !active;
+  document.body.classList.toggle('active', active);
+  $('#dock-rate').textContent = st === 'manual' ? engine.manualVel + '%' : Math.round(engine.rate * 100) + '%';
+  $('#dock-view').hidden = $('#tab-play').classList.contains('active');
   $('#rate').value = Math.round(engine.rate * 100);
   $('#rate-val').textContent = Math.round(engine.rate * 100) + '%';
 }
@@ -130,6 +136,7 @@ function frame(now) {
     const lo = settings.strokeMin, hi = settings.strokeMax;
     const shown = st === 'manual' ? pos : lo + (pos / 100) * (hi - lo);
     $('#rail-knob').style.setProperty('--pos', shown.toFixed(1));
+    $('#mini-knob').style.setProperty('--pos', shown.toFixed(1));
   }
   // live graph window: 5 s back, 15 s ahead
   if ($('#tab-play').classList.contains('active')) {
@@ -169,9 +176,20 @@ engine.addEventListener('tick', () => {
   }
   $('#dock-sub').textContent = sub;
   $('#progress-bar').style.width = Math.min(100, pct) + '%';
+  $('#dock-bar').style.width = Math.min(100, pct) + '%';
 });
 
 $('#stop').addEventListener('click', () => engine.stop());
+function stepSpeed(dir) {
+  if (engine.state === 'manual') {
+    engine.setManualVelocity(Math.max(0, Math.min(100, engine.manualVel + dir * 5)));
+    $('#man-vel').value = engine.manualVel;
+    $('#man-vel-val').textContent = engine.manualVel + '%';
+  } else engine.setRate(Math.round(engine.rate * 10 + dir) / 10);
+}
+$('#dock-slower').addEventListener('click', () => stepSpeed(-1));
+$('#dock-faster').addEventListener('click', () => stepSpeed(1));
+$('#dock-view').addEventListener('click', () => showTab('play'));
 $('#too-close').addEventListener('click', () => engine.tooClose());
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') engine.stop();
@@ -281,7 +299,6 @@ $('#lib-new').addEventListener('click', () => { newCreate(); showTab('create'); 
 function playScript(script) {
   engine.play(structuredClone({ seed: newSeed(), ...script }));
   updateNow();
-  showTab('play');
 }
 
 // ---------------- manual ----------------

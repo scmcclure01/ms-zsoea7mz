@@ -190,11 +190,24 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; marg
 /* ---------- dock ---------- */
 .dock {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
-  display: flex; align-items: center; gap: 10px;
+  display: flex; flex-direction: column; gap: 8px; overflow: hidden;
   padding: 10px 16px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
   background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
 }
+body.active { --dock-h: 120px; }
+.dock-main { display: flex; align-items: center; gap: 10px; }
+.dock-progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; }
+#dock-bar { height: 100%; width: 0; background: var(--accent); }
+.dock-extra { display: flex; align-items: center; gap: 10px; }
+.mini-rail { flex: 1; height: 10px; border-radius: 5px; background: var(--surface2); position: relative; min-width: 60px; }
+#mini-knob {
+  position: absolute; top: 0; bottom: 0; width: 22px; border-radius: 5px; background: var(--accent);
+  left: calc(var(--pos, 0) * (100% - 22px) / 100); transition: left 60ms linear;
+}
+.stepper { display: flex; align-items: center; gap: 6px; }
+.stepper .btn { min-width: 38px; font-size: 1.1rem; font-weight: 700; }
+#dock-rate { min-width: 46px; text-align: center; font-weight: 600; font-variant-numeric: tabular-nums; font-size: .9rem; }
 .dock-info { flex: 1; min-width: 0; }
 .dock-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .dock-sub { font-size: .8rem; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
