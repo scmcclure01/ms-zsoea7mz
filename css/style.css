@@ -12,7 +12,7 @@
   --warn: #f0a63a;
   --stop: #e5484d;
   --radius: 14px;
-  --dock-h: 74px;
+  --dock-h: calc(74px + env(safe-area-inset-bottom)); /* updated from the real dock height by app.js */
   --tabs-h: 0px;
   color-scheme: dark;
 }
@@ -38,7 +38,7 @@ body {
   color: var(--text);
   font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
-  padding-bottom: calc(var(--dock-h) + var(--tabs-h) + env(safe-area-inset-bottom) + 16px);
+  padding-bottom: calc(var(--dock-h) + var(--tabs-h) + 16px);
 }
 h1, h2, h3 { margin: 0 0 .5rem; line-height: 1.2; }
 h2 { font-size: 1.2rem; }
@@ -195,7 +195,11 @@ input[type=range] { width: 100%; accent-color: var(--accent); height: 30px; marg
   background: color-mix(in srgb, var(--surface) 92%, transparent); backdrop-filter: blur(10px);
   border-top: 1px solid var(--border);
 }
-body.active { --dock-h: 120px; }
+.dock-limits { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dock-limits label { display: flex; align-items: center; gap: 8px; font-size: .78rem; color: var(--muted); min-width: 0; }
+.dock-limits span { white-space: nowrap; min-width: 64px; }
+.dock-limits b { color: var(--text); font-variant-numeric: tabular-nums; }
+.dock-limits input[type=range] { flex: 1; min-width: 0; height: 26px; }
 .dock-main { display: flex; align-items: center; gap: 10px; }
 .dock-progress { position: absolute; left: 0; right: 0; top: 0; height: 3px; }
 #dock-bar { height: 100%; width: 0; background: var(--accent); }
@@ -221,7 +225,7 @@ body.active { --dock-h: 120px; }
 @media (max-width: 700px) {
   :root { --tabs-h: 58px; }
   .tabs {
-    position: fixed; left: 0; right: 0; bottom: calc(var(--dock-h) + env(safe-area-inset-bottom)); z-index: 19;
+    position: fixed; left: 0; right: 0; bottom: var(--dock-h); z-index: 19;
     background: var(--surface); border-top: 1px solid var(--border); padding: 4px 6px; gap: 0; margin: 0;
   }
   .tabs button { flex-direction: column; gap: 1px; font-size: .68rem; padding: 6px 2px; }

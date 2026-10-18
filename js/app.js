@@ -112,6 +112,7 @@ function updateNow() {
   $('#dock').classList.toggle('cooldown', st === 'cooldown');
   const active = st !== 'idle';
   $('#dock-extra').hidden = !active;
+  $('#dock-limits').hidden = !active;
   document.body.classList.toggle('active', active);
   $('#dock-rate').textContent = st === 'manual' ? engine.manualVel + '%' : Math.round(engine.rate * 100) + '%';
   $('#dock-view').hidden = $('#tab-play').classList.contains('active');
@@ -190,6 +191,10 @@ function stepSpeed(dir) {
 $('#dock-slower').addEventListener('click', () => stepSpeed(-1));
 $('#dock-faster').addEventListener('click', () => stepSpeed(1));
 $('#dock-view').addEventListener('click', () => showTab('play'));
+// keep page padding / tab bar position matched to the dock's real height
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px');
+}).observe($('#dock'));
 $('#too-close').addEventListener('click', () => engine.tooClose());
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') engine.stop();
