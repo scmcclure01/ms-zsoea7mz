@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="referrer" content="no-referrer">
+  <meta name="theme-color" content="#111318">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Motion Studio</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%237c6cff'/%3E%3Cpath d='M5 20 Q9 6 13 16 T21 16 T27 12' stroke='white' stroke-width='3' fill='none' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">Motion Studio</div>
+    <button id="conn-pill" class="pill" title="Connection">
+      <span class="dot"></span><span id="conn-text">Not connected</span>
+    </button>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="play" class="active"><span class="ti">▶</span><span>Play</span></button>
+    <button data-tab="manual"><span class="ti">⇅</span><span>Manual</span></button>
+    <button data-tab="presets"><span class="ti">☰</span><span>Presets</span></button>
+    <button data-tab="random"><span class="ti">⚄</span><span>Random</span></button>
+    <button data-tab="create"><span class="ti">✎</span><span>Create</span></button>
+    <button data-tab="settings"><span class="ti">⚙</span><span>Settings</span></button>
+  </nav>
+
+  <main>
+    <!-- PLAY -->
+    <section id="tab-play" class="tab active">
+      <div class="card now">
+        <div class="now-head">
+          <div>
+            <div class="eyebrow" id="now-state">Idle</div>
+            <h2 id="now-name">Nothing playing</h2>
+          </div>
+          <div class="now-time" id="now-time">0:00</div>
+        </div>
+        <div class="viz">
+          <div class="rail"><div class="rail-knob" id="rail-knob"></div></div>
+          <canvas id="live-graph" class="live-graph"></canvas>
+        </div>
+        <div class="progress"><div id="progress-bar"></div></div>
+        <div class="controls">
+          <label class="slider-row">
+            <span>Speed <b id="rate-val">100%</b></span>
+            <input type="range" id="rate" min="25" max="200" step="5" value="100">
+          </label>
+          <div class="stroke-limits">
+            <label class="slider-row"><span>Stroke bottom <b id="smin-val">0</b></span><input type="range" id="stroke-min" min="0" max="95" value="0"></label>
+            <label class="slider-row"><span>Stroke top <b id="smax-val">100</b></span><input type="range" id="stroke-max" min="5" max="100" value="100"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <h3>My scripts</h3>
+        <div class="btns">
+          <button id="lib-import" class="btn ghost sm">Import .funscript</button>
+          <button id="lib-new" class="btn ghost sm">+ New</button>
+        </div>
+      </div>
+      <div id="library" class="list"></div>
+    </section>
+
+    <!-- MANUAL -->
+    <section id="tab-manual" class="tab">
+      <div class="card">
+        <h2>Manual control</h2>
+        <p class="muted">Steady up-and-down at the speed and stroke range you set. Changes apply live.</p>
+        <label class="slider-row big">
+          <span>Speed <b id="man-vel-val">30%</b></span>
+          <input type="range" id="man-vel" min="0" max="100" value="30">
+        </label>
+        <div class="stroke-limits">
+          <label class="slider-row"><span>Stroke bottom <b class="smin-mirror">0</b></span><input type="range" class="stroke-min" min="0" max="95" value="0"></label>
+          <label class="slider-row"><span>Stroke top <b class="smax-mirror">100</b></span><input type="range" class="stroke-max" min="5" max="100" value="100"></label>
+        </div>
+        <div class="quick">
+          <span class="muted">Quick zones:</span>
+          <button class="btn ghost sm" data-zone="0,100">Full</button>
+          <button class="btn ghost sm" data-zone="55,100">Tip</button>
+          <button class="btn ghost sm" data-zone="25,75">Middle</button>
+          <button class="btn ghost sm" data-zone="0,45">Base</button>
+        </div>
+        <button id="man-start" class="btn primary block">Start manual</button>
+      </div>
+    </section>
+
+    <!-- PRESETS -->
+    <section id="tab-presets" class="tab">
+      <div id="presets"></div>
+    </section>
+
+    <!-- RANDOM -->
+    <section id="tab-random" class="tab">
+      <div class="card">
+        <h2>Random</h2>
+        <div class="random-big">
+          <button id="rnd-surprise" class="btn primary big">⚄ Surprise me</button>
+          <button id="rnd-endless" class="btn accent2 big">∞ Endless random</button>
+        </div>
+        <p class="muted small">Surprise picks random settings below and plays right away. Endless keeps generating new material using the settings below until you stop it.</p>
+      </div>
+      <div class="card">
+        <h3>Dials</h3>
+        <div class="grid2">
+          <label class="slider-row"><span>Length <b id="rd-min-val"></b></span><input type="range" id="rd-min" min="2" max="60" value="15"></label>
+          <label class="slider-row"><span>Chaos <b id="rd-chaos-val"></b></span><input type="range" id="rd-chaos" min="0" max="100" value="40"></label>
+          <label class="slider-row"><span>Slowest <b id="rd-smin-val"></b></span><input type="range" id="rd-smin" min="10" max="200" step="5" value="40"></label>
+          <label class="slider-row"><span>Fastest <b id="rd-smax-val"></b></span><input type="range" id="rd-smax" min="20" max="240" step="5" value="140"></label>
+          <label class="slider-row"><span>Lowest point <b id="rd-lo-val"></b></span><input type="range" id="rd-lo" min="0" max="80" value="0"></label>
+          <label class="slider-row"><span>Highest point <b id="rd-hi-val"></b></span><input type="range" id="rd-hi" min="20" max="100" value="100"></label>
+        </div>
+        <div class="seg" id="rd-arc">
+          <button data-v="flat" class="active">Steady mix</button>
+          <button data-v="build">Builds up</button>
+          <button data-v="waves">Waves</button>
+        </div>
+        <button id="rnd-gen" class="btn primary block">Generate</button>
+      </div>
+      <div class="card" id="rnd-result" hidden>
+        <div class="section-head"><h3 id="rnd-title">Random script</h3><span class="muted" id="rnd-dur"></span></div>
+        <canvas class="graph" id="rnd-graph"></canvas>
+        <div class="muted small">Shaded = stroke range · line = speed</div>
+        <div class="btns wrap">
+          <button id="rnd-play" class="btn primary">▶ Play</button>
+          <button id="rnd-again" class="btn ghost">↻ Regenerate</button>
+          <button id="rnd-save" class="btn ghost">Save to library</button>
+          <button id="rnd-edit" class="btn ghost">Edit in builder</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- CREATE -->
+    <section id="tab-create" class="tab">
+      <div class="card">
+        <div class="create-head">
+          <input id="cr-name" class="name-input" placeholder="Script name" value="My script">
+          <div class="seg" id="cr-mode">
+            <button data-v="blocks" class="active">Block builder</button>
+            <button data-v="timeline">Timeline</button>
+          </div>
+        </div>
+        <canvas class="graph" id="cr-graph"></canvas>
+        <div class="muted small" id="cr-info"></div>
+
+        <div id="cr-blocks-pane">
+          <div id="cr-blocks" class="blocks"></div>
+          <div class="btns wrap">
+            <button class="btn ghost sm" data-add="stroke">+ Strokes</button>
+            <button class="btn ghost sm" data-add="pause">+ Pause</button>
+            <button class="btn ghost sm" data-add="repeat">+ Repeat</button>
+            <label class="chk inline"><input type="checkbox" id="cr-loop"> Loop until stopped</label>
+          </div>
+        </div>
+
+        <div id="cr-timeline-pane" hidden>
+          <div class="tl-toolbar">
+            <div class="seg" id="tl-mode">
+              <button data-v="edit" class="active" title="Tap to add a point, drag to move">Point</button>
+              <button data-v="draw" title="Drag to draw freehand">Draw</button>
+              <button data-v="erase" title="Tap or drag over points to delete">Erase</button>
+            </div>
+            <div class="btns">
+              <button class="btn ghost sm" id="tl-zin" aria-label="Zoom in">＋</button>
+              <button class="btn ghost sm" id="tl-zout" aria-label="Zoom out">－</button>
+              <button class="btn ghost sm" id="tl-fit">Fit</button>
+              <button class="btn ghost sm" id="tl-left" aria-label="Scroll left">◀</button>
+              <button class="btn ghost sm" id="tl-right" aria-label="Scroll right">▶</button>
+            </div>
+          </div>
+          <canvas id="tl-canvas" class="tl-canvas"></canvas>
+          <div class="tl-sel" id="tl-sel" hidden>
+            <label class="fld"><span>Time (s)</span><input type="number" id="tl-sel-t" step="0.05"></label>
+            <label class="fld"><span>Position</span><input type="number" id="tl-sel-x" min="0" max="100"></label>
+            <button class="btn ghost sm danger" id="tl-sel-del">Delete point</button>
+          </div>
+          <p class="muted small">Point mode: tap empty space to add, drag to move. Draw mode: drag to sketch. Scroll/◀▶ to move, Ctrl+wheel or ＋/－ to zoom.</p>
+          <div class="btns wrap">
+            <button class="btn ghost sm" id="tl-append">Append pattern…</button>
+            <button class="btn ghost sm danger" id="tl-clear">Clear all</button>
+          </div>
+        </div>
+
+        <div class="btns wrap sticky-actions">
+          <button id="cr-play" class="btn primary">▶ Play</button>
+          <button id="cr-save" class="btn ghost">Save</button>
+          <button id="cr-saveas" class="btn ghost">Save as new</button>
+          <button id="cr-export" class="btn ghost">Export .funscript</button>
+          <button id="cr-new" class="btn ghost">New</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section id="tab-settings" class="tab">
+      <div class="card">
+        <h2>Connection</h2>
+        <label class="fld wide"><span>Connection Key</span>
+          <input id="set-key" type="password" autocomplete="off" spellcheck="false" placeholder="From the Handy app / handyfeeling.com">
+        </label>
+        <label class="fld wide"><span>Application ID <em>(needed for firmware 4+)</em></span>
+          <input id="set-appid" type="password" autocomplete="off" spellcheck="false" placeholder="From user.handyfeeling.com → API tokens">
+        </label>
+        <label class="chk inline"><input type="checkbox" id="set-show"> Show keys</label>
+        <div class="btns wrap">
+          <button id="set-connect" class="btn primary">Connect & test</button>
+          <button id="set-demo" class="btn ghost">Use demo mode (no device)</button>
+        </div>
+        <div id="conn-detail" class="muted small"></div>
+        <p class="muted small">Keys are stored only in this browser and sent only to Handy's own servers (handyfeeling.com). Leave the key empty to use demo mode.</p>
+      </div>
+
+      <div class="card">
+        <h2>Safety & comfort</h2>
+        <label class="slider-row"><span>Max speed <b id="set-maxspeed-val"></b></span><input type="range" id="set-maxspeed" min="10" max="100" step="5"></label>
+        <label class="slider-row"><span>Gentle start (ease-in) <b id="set-ease-val"></b></span><input type="range" id="set-ease" min="0" max="60" step="5"></label>
+        <label class="slider-row"><span>Session time limit <b id="set-maxmin-val"></b></span><input type="range" id="set-maxmin" min="0" max="120" step="5"></label>
+      </div>
+
+      <div class="card">
+        <h2>"Too close" button</h2>
+        <label class="slider-row"><span>Cooldown <b id="set-cool-val"></b></span><input type="range" id="set-cool" min="5" max="120" step="5"></label>
+        <label class="slider-row"><span>Rewind script by <b id="set-rewind-val"></b></span><input type="range" id="set-rewind" min="0" max="180" step="15"></label>
+        <label class="slider-row"><span>Slow down after each press <b id="set-slow-val"></b></span><input type="range" id="set-slow" min="0" max="40" step="5"></label>
+        <div class="seg" id="set-coolstyle">
+          <button data-v="stop">Full stop during cooldown</button>
+          <button data-v="gentle">Very slow strokes during cooldown</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted small">Your scripts are saved in this browser only. Export a backup to move them to another device (keys are not included).</p>
+        <div class="btns wrap">
+          <button id="bk-export" class="btn ghost">Export backup</button>
+          <button id="bk-import" class="btn ghost">Import backup</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Always-visible dock -->
+  <div class="dock" id="dock">
+    <div class="dock-info">
+      <div class="dock-name" id="dock-name">Ready</div>
+      <div class="dock-sub" id="dock-sub">Pick something to play</div>
+    </div>
+    <button id="too-close" class="btn warn" disabled>Too close</button>
+    <button id="stop" class="btn stop">STOP</button>
+  </div>
+
+  <dialog id="modal">
+    <form method="dialog">
+      <h3 id="modal-title"></h3>
+      <div id="modal-body"></div>
+      <div class="btns end">
+        <button value="cancel" class="btn ghost">Cancel</button>
+        <button value="ok" class="btn primary" id="modal-ok">OK</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
