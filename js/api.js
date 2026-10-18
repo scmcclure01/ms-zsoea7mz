@@ -87,9 +87,12 @@ export class V3Driver {
     this.stream = null;
     this.mode = null;
     this.name = 'v3';
+    this.auth = 'bearer'; // or 'apikey' — Handy accepts the ID either way depending on token type
   }
   h() {
-    return { 'X-Connection-Key': this.key, Authorization: `Bearer ${this.appId}` };
+    return this.auth === 'apikey'
+      ? { 'X-Connection-Key': this.key, 'X-Api-Key': this.appId }
+      : { 'X-Connection-Key': this.key, Authorization: `Bearer ${this.appId}` };
   }
   req(path, opts = {}) {
     return call(V3 + path, { ...opts, headers: { ...this.h(), ...(opts.headers || {}) } });
@@ -98,7 +101,14 @@ export class V3Driver {
     return this.req(path, { method: 'PUT', body: body ?? {} });
   }
   async connect() {
-    const c = await this.req('/connected');
+    let c;
+    try {
+      c = await this.req('/connected');
+    } catch (e) {
+      if (!/authorized/i.test(e.message)) throw e;
+      this.auth = 'apikey';
+      c = await this.req('/connected');
+    }
     if (!(c?.result?.connected ?? c?.connected)) throw new ApiError('Handy is not online. Make sure it is powered on and connected to Wi-Fi (LED should be blue/purple).');
     const info = (await this.req('/info')).result || {};
     await this.syncTime();
@@ -317,26 +327,28 @@ export class SimDriver {
 // Pick the right driver for this device.
 export async function autoConnect(key, appId) {
   if (!key) return { driver: new SimDriver(), info: await new SimDriver().connect() };
-  const errors = [];
+  let v3err = null;
   if (appId) {
     const d = new V3Driver(key, appId);
     try {
       const info = await d.connect();
       return { driver: d, info };
     } catch (e) {
-      errors.push('v3: ' + e.message);
-      if (/authorized/i.test(e.message)) throw e;
+      v3err = e;
     }
   }
+  // Older firmware (3.x) works without an Application ID.
   const d2 = new V2Driver(key);
+  let v2err = null;
   try {
     const info = await d2.connect();
-    if (String(info.fw || '').match(/^[4-9]/) && !appId) {
-      throw new ApiError(`Your Handy has firmware ${info.fw}. This needs the v3 API — add your Application ID in Settings.`);
-    }
-    return { driver: d2, info };
+    if (!String(info.fw || '').match(/^[4-9]/)) return { driver: d2, info };
+    v2err = new ApiError(`Your Handy has firmware ${info.fw}, which needs an Application ID.`);
   } catch (e) {
-    errors.push('v2: ' + e.message);
+    v2err = e;
   }
-  throw new ApiError(errors.join(' | '));
+  if (v3err && /authorized/i.test(v3err.message)) {
+    throw new ApiError('Handy rejected the Application ID. Make sure you copied the Application ID (not the Key), with no extra spaces, and that the token is active at user.handyfeeling.com.');
+  }
+  throw v3err || v2err;
 }

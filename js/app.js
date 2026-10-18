@@ -620,8 +620,12 @@ $('#set-show').addEventListener('change', (e) => {
   $('#set-key').type = $('#set-appid').type = e.target.checked ? 'text' : 'password';
 });
 $('#set-connect').addEventListener('click', () => {
-  settings.connectionKey = $('#set-key').value.trim();
-  settings.appId = $('#set-appid').value.trim();
+  // pasted keys often carry spaces, line breaks or a "Bearer " prefix
+  const clean = (v) => v.replace(/^\s*bearer\s+/i, '').replace(/[\s\u200b-\u200d\ufeff]+/g, '');
+  settings.connectionKey = clean($('#set-key').value);
+  settings.appId = clean($('#set-appid').value);
+  $('#set-key').value = settings.connectionKey;
+  $('#set-appid').value = settings.appId;
   saveSettings(settings);
   connect(true);
 });
