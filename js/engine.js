@@ -119,14 +119,21 @@ export class Engine extends EventTarget {
       return;
     }
     if (this.state !== 'playing' && this.state !== 'manual') return;
-    const resumeFrom = this.state === 'playing' ? Math.max(0, this.t - s.rewindSec * 1000) : null;
     const wasManual = this.state === 'manual';
+    const now = this.t;
+    const resumeFrom = wasManual ? null : Math.max(0, now - (s.rewindSec || 0) * 1000);
+    // A true pause keeps the device's place in the script; anything else needs a fresh start.
+    this.pauseMode = !wasManual && s.style !== 'gentle' && resumeFrom === now;
     this.resumeFrom = resumeFrom;
     this.resumeManual = wasManual;
     this.state = 'cooldown';
     this.cooldownEnd = performance.now() + s.cooldownSec * 1000;
     this.setAnchor(resumeFrom ?? 0);
     this.emit('state');
+    if (this.pauseMode) {
+      this.queue(() => this.driver.pause());
+      return;
+    }
     this.queue(async () => {
       await this.driver.stopAll();
       if (s.style === 'gentle') await this.driver.hampStart(Math.min(12, this.settings.maxSpeed));
@@ -136,16 +143,32 @@ export class Engine extends EventTarget {
     if (this.state !== 'cooldown') return;
     const s = this.settings.tooClose;
     const slower = 1 - (s.slowdownPct || 0) / 100;
-    if (s.style === 'gentle') this.queue(() => this.driver.hampStop());
     if (this.resumeManual) {
       this.manualVel = Math.max(5, Math.round(this.manualVel * slower));
       this.state = 'idle';
       this.startManual(this.manualVel);
       return;
     }
+    if (this.pauseMode) {
+      const from = this.resumeFrom ?? 0;
+      this.state = 'playing';
+      this.setAnchor(from);
+      this.emit('state');
+      this.queue(async () => {
+        await this.driver.resume(from);
+        if (this.state === 'playing') this.setAnchor(from);
+      });
+      if (slower < 1) this.setRate(this.rate * slower);
+      return;
+    }
+    if (s.style === 'gentle') this.queue(() => this.driver.hampStop());
     this.rate = Math.max(0.25, this.rate * slower);
     this.state = 'idle';
     this.startAt(this.resumeFrom ?? 0);
+  }
+  // "Resume now" from the cooldown screen
+  resumeNow() {
+    if (this.state === 'cooldown') this.endCooldown();
   }
 
   // ---------- manual (HAMP) ----------

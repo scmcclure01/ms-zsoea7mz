@@ -116,6 +116,8 @@ function updateNow() {
   document.body.classList.toggle('active', active);
   $('#dock-rate').textContent = st === 'manual' ? engine.manualVel + '%' : Math.round(engine.rate * 100) + '%';
   $('#dock-view').hidden = $('#tab-play').classList.contains('active');
+  $('#dock-resume').hidden = st !== 'cooldown';
+  $('#dock-extra .stepper').hidden = st === 'cooldown';
   $('#rate').value = Math.round(engine.rate * 100);
   $('#rate-val').textContent = Math.round(engine.rate * 100) + '%';
 }
@@ -163,7 +165,7 @@ engine.addEventListener('tick', () => {
     $('#now-time').textContent = fmtTime(t);
   } else if (st === 'cooldown') {
     const left = Math.max(0, engine.cooldownEnd - performance.now());
-    sub = `Resuming in ${Math.ceil(left / 1000)} s — tap again for more time`;
+    sub = `Paused · resuming in ${Math.ceil(left / 1000)} s`;
     $('#now-time').textContent = '−' + Math.ceil(left / 1000) + 's';
   } else if (st === 'manual') {
     sub = `Manual · speed ${engine.manualVel}%`;
@@ -191,6 +193,7 @@ function stepSpeed(dir) {
 $('#dock-slower').addEventListener('click', () => stepSpeed(-1));
 $('#dock-faster').addEventListener('click', () => stepSpeed(1));
 $('#dock-view').addEventListener('click', () => showTab('play'));
+$('#dock-resume').addEventListener('click', () => engine.resumeNow());
 // keep page padding / tab bar position matched to the dock's real height
 new ResizeObserver(() => {
   document.documentElement.style.setProperty('--dock-h', $('#dock').offsetHeight + 'px');

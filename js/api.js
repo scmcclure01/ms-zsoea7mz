@@ -196,6 +196,18 @@ export class V3Driver {
     if (this.stream) this.stream.rate = rate;
     await this.put('/hsp/playbackrate', { playback_rate: rate });
   }
+  pause() {
+    return this.put('/hsp/pause');
+  }
+  async resume(scriptT) {
+    try {
+      await this.put('/hsp/resume', { pick_up: false });
+    } catch {
+      // if the device lost the paused stream, restart it at the same spot
+      const s = this.stream;
+      if (s) await this.startStream(s.tl, scriptT, s.rate, s.shape);
+    }
+  }
   async stopStream() {
     if (this.stream) this.stream.alive = false;
     this.stream = null;
@@ -294,6 +306,13 @@ export class V2Driver {
     this.stream = null;
     await this.put('/hssp/stop');
   }
+  pause() {
+    return this.put('/hssp/stop');
+  }
+  async resume(scriptT) {
+    const s = this.stream;
+    if (s) await this.startStream(s.tl, scriptT, s.rate, s.shape);
+  }
   async hampStart(v) {
     await this.setMode(0);
     await this.put('/hamp/velocity', { velocity: Math.round(v) });
@@ -316,6 +335,8 @@ export class SimDriver {
   async feed() {}
   async pollState() { return null; }
   async setRate() {}
+  async pause() {}
+  async resume() {}
   async stopStream() {}
   async hampStart() {}
   async hampVelocity() {}

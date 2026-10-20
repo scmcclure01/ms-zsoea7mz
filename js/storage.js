@@ -11,7 +11,8 @@ export const DEFAULT_SETTINGS = {
   easeInSec: 10,
   strokeMin: 0,
   strokeMax: 100,
-  tooClose: { cooldownSec: 20, style: 'stop', rewindSec: 45, slowdownPct: 10 },
+  tooClose: { cooldownSec: 20, style: 'stop', rewindSec: 0, slowdownPct: 0 },
+  settingsRev: 2,
 };
 
 function read(key, fallback) {
@@ -33,7 +34,15 @@ function write(key, value) {
 
 export function loadSettings() {
   const s = read(SETTINGS_KEY, {});
-  return { ...DEFAULT_SETTINGS, ...s, tooClose: { ...DEFAULT_SETTINGS.tooClose, ...(s.tooClose || {}) } };
+  const out = { ...DEFAULT_SETTINGS, ...s, tooClose: { ...DEFAULT_SETTINGS.tooClose, ...(s.tooClose || {}) } };
+  // rev 2: "Too close" became a true pause — clear the old rewind/slowdown defaults once
+  if ((s.settingsRev || 1) < 2) {
+    out.tooClose.rewindSec = 0;
+    out.tooClose.slowdownPct = 0;
+    out.settingsRev = 2;
+    write(SETTINGS_KEY, out);
+  }
+  return out;
 }
 export const saveSettings = (s) => write(SETTINGS_KEY, s);
 

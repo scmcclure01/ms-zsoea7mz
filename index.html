@@ -225,11 +225,12 @@
 
       <div class="card">
         <h2>"Too close" button</h2>
+        <p class="muted small">Pauses where you are and picks up from the same spot after the cooldown (or tap ▶ Resume). Rewind and slow-down are optional extras.</p>
         <label class="slider-row"><span>Cooldown <b id="set-cool-val"></b></span><input type="range" id="set-cool" min="5" max="120" step="5"></label>
         <label class="slider-row"><span>Rewind script by <b id="set-rewind-val"></b></span><input type="range" id="set-rewind" min="0" max="180" step="15"></label>
         <label class="slider-row"><span>Slow down after each press <b id="set-slow-val"></b></span><input type="range" id="set-slow" min="0" max="40" step="5"></label>
         <div class="seg" id="set-coolstyle">
-          <button data-v="stop">Full stop during cooldown</button>
+          <button data-v="stop">Pause during cooldown</button>
           <button data-v="gentle">Very slow strokes during cooldown</button>
         </div>
       </div>
@@ -255,6 +256,7 @@
         <span id="dock-rate">100%</span>
         <button class="btn ghost sm" id="dock-faster" aria-label="Faster">+</button>
       </div>
+      <button class="btn primary sm" id="dock-resume" hidden>▶ Resume</button>
       <button class="btn ghost sm" id="dock-view">Full view</button>
     </div>
     <div class="dock-limits" id="dock-limits" hidden>
