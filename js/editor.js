@@ -1,6 +1,6 @@
 // Graph preview, timeline (point) editor and block builder UI.
 
-import { STYLES, strokes, pause, repeat, fmtTime } from './scripts.js';
+import { STYLES, strokes, pause, repeat, fmtTime } from './scripts.js?v=202610201921';
 
 const css = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
 

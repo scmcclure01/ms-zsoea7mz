@@ -14,7 +14,7 @@
 //   stopAll()                emergency stop: everything, ignoring errors
 //   syncTime()               returns server-time estimate offset (optional)
 
-import { toFunscript } from './scripts.js';
+import { toFunscript } from './scripts.js?v=202610201921';
 
 const V3 = 'https://www.handyfeeling.com/api/handy-rest/v3';
 const V2 = 'https://www.handyfeeling.com/api/handy/v2';
@@ -299,7 +299,7 @@ export class V2Driver {
   async pollState() { return null; }
   async setRate(rate, scriptT) {
     const s = this.stream;
-    if (!s) return;
+    if (!s || s.rate === rate) return;
     await this.startStream(s.tl, scriptT, rate, s.shape);
   }
   async stopStream() {

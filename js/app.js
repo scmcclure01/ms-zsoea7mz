@@ -1,13 +1,13 @@
 import {
   PRESETS, LENGTH_CHOICES, presetScript, randomBlocks, surpriseParams, blocksDuration, scriptPoints,
   toFunscript, fromFunscript, fmtTime, newSeed, rng, strokes, compileBlocks, STYLES, Timeline, LEAD_IN_MS,
-} from './scripts.js';
-import { autoConnect, SimDriver } from './api.js';
-import { Engine } from './engine.js';
-import { drawGraph, TimelineEditor, renderBlocks, newBlock } from './editor.js';
+} from './scripts.js?v=202610201921';
+import { autoConnect, SimDriver } from './api.js?v=202610201921';
+import { Engine } from './engine.js?v=202610201921';
+import { drawGraph, TimelineEditor, renderBlocks, newBlock } from './editor.js?v=202610201921';
 import {
   loadSettings, saveSettings, loadLibrary, saveLibrary, uid, download, pickFile, backupData,
-} from './storage.js';
+} from './storage.js?v=202610201921';
 
 const $ = (s, el = document) => el.querySelector(s);
 const $$ = (s, el = document) => [...el.querySelectorAll(s)];
@@ -614,7 +614,6 @@ const settingSliders = [
   ['set-maxmin', () => settings.maxSessionMin, (v) => (settings.maxSessionMin = v), (v) => (v ? `${v} min` : 'no limit')],
   ['set-cool', () => settings.tooClose.cooldownSec, (v) => (settings.tooClose.cooldownSec = v), (v) => `${v} s`],
   ['set-rewind', () => settings.tooClose.rewindSec, (v) => (settings.tooClose.rewindSec = v), (v) => (v ? `${v} s` : 'none')],
-  ['set-slow', () => settings.tooClose.slowdownPct, (v) => (settings.tooClose.slowdownPct = v), (v) => (v ? pctLabel(v) : 'none')],
 ];
 function renderSettings() {
   $('#set-key').value = settings.connectionKey;

@@ -1,8 +1,8 @@
 // Playback engine: owns the clock, the current script timeline, safety caps,
 // "Too close" cooldowns and the session timer. Talks to whichever driver is active.
 
-import { Timeline, shapePoints } from './scripts.js';
-import { SimDriver } from './api.js';
+import { Timeline, shapePoints } from './scripts.js?v=202610201921';
+import { SimDriver } from './api.js?v=202610201921';
 
 export class Engine extends EventTarget {
   constructor(settings) {
@@ -142,27 +142,27 @@ export class Engine extends EventTarget {
   endCooldown() {
     if (this.state !== 'cooldown') return;
     const s = this.settings.tooClose;
-    const slower = 1 - (s.slowdownPct || 0) / 100;
+    // Always resume at the same speed the user was at.
     if (this.resumeManual) {
-      this.manualVel = Math.max(5, Math.round(this.manualVel * slower));
       this.state = 'idle';
       this.startManual(this.manualVel);
       return;
     }
     if (this.pauseMode) {
       const from = this.resumeFrom ?? 0;
+      const rate = this.rate;
       this.state = 'playing';
       this.setAnchor(from);
       this.emit('state');
       this.queue(async () => {
         await this.driver.resume(from);
+        // re-assert the playback rate in case the device reset it while paused
+        await this.driver.setRate(rate, from).catch(() => {});
         if (this.state === 'playing') this.setAnchor(from);
       });
-      if (slower < 1) this.setRate(this.rate * slower);
       return;
     }
     if (s.style === 'gentle') this.queue(() => this.driver.hampStop());
-    this.rate = Math.max(0.25, this.rate * slower);
     this.state = 'idle';
     this.startAt(this.resumeFrom ?? 0);
   }
